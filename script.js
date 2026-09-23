@@ -56,7 +56,52 @@ controls.addEventListener("unlock",function(){
 inicio.style.display="flex";
 });
 
+// ========================================
+// CARGADOR DE IMÁGENES
+// ========================================
+
+const textureLoader=new THREE.TextureLoader();
+
+function cargarImagen(nombre,funcion){
+
+// IMPORTANTE:
+// LAS IMÁGENES ESTÁN EN LA MISMA CARPETA
+// QUE index.html Y script.js
+
+const ruta="./"+nombre;
+
+console.log("BUSCANDO IMAGEN:",ruta);
+
+textureLoader.load(
+ruta,
+
+function(textura){
+
+// THREE.JS R128
+textura.encoding=THREE.sRGBEncoding;
+textura.needsUpdate=true;
+
+console.log("IMAGEN CARGADA:",ruta);
+
+funcion(textura);
+
+},
+
+undefined,
+
+function(error){
+
+console.error("ERROR AL CARGAR:",ruta);
+console.error(error);
+
+}
+);
+
+}
+
+// ========================================
 // LUCES
+// ========================================
 
 const ambiente=new THREE.AmbientLight(
 0xffffff,
@@ -77,9 +122,12 @@ luzPrincipal.position.set(
 );
 
 luzPrincipal.castShadow=true;
+
 scene.add(luzPrincipal);
 
+// ========================================
 // PISO
+// ========================================
 
 const radio=12;
 const altura=7;
@@ -96,9 +144,12 @@ materialPiso
 
 piso.rotation.x=-Math.PI/2;
 piso.receiveShadow=true;
+
 scene.add(piso);
 
+// ========================================
 // PARED
+// ========================================
 
 const materialPared=new THREE.MeshStandardMaterial({
 color:0x17645f,
@@ -119,9 +170,12 @@ materialPared
 );
 
 pared.position.y=altura/2;
+
 scene.add(pared);
 
+// ========================================
 // TECHO
+// ========================================
 
 const materialTecho=new THREE.MeshStandardMaterial({
 color:0xd8d1c5,
@@ -135,9 +189,12 @@ materialTecho
 
 techo.rotation.x=Math.PI/2;
 techo.position.y=altura;
+
 scene.add(techo);
 
-// BORDE DEL PISO
+// ========================================
+// BORDE
+// ========================================
 
 const borde=new THREE.Mesh(
 new THREE.TorusGeometry(
@@ -153,19 +210,19 @@ color:0x3b2920
 
 borde.rotation.x=Math.PI/2;
 borde.position.y=.12;
+
 scene.add(borde);
 
-// CREAR CUADROS
+// ========================================
+// CUADROS
+// ========================================
 
 function crearCuadro(nombre,angulo){
 
 const ancho=3.0;
 const alto=4.8;
 
-const x=Math.sin(angulo)*(radio-.20);
-const z=Math.cos(angulo)*(radio-.20);
-
-// Marco
+// MARCO
 
 const marco=new THREE.Mesh(
 new THREE.BoxGeometry(
@@ -180,24 +237,25 @@ roughness:.45
 );
 
 marco.position.set(
-x,
+Math.sin(angulo)*(radio-.20),
 3.6,
-z
+Math.cos(angulo)*(radio-.20)
 );
 
 marco.rotation.y=angulo+Math.PI;
+
 scene.add(marco);
 
-// Imagen
+// ========================================
+// IMAGEN
+// ========================================
 
-const ruta="./imagenes/"+nombre;
-const loader=new THREE.TextureLoader();
+// CORREGIDO:
+// YA NO USA ./imagenes/
 
-loader.load(
-ruta,
+cargarImagen(
+nombre,
 function(textura){
-
-textura.colorSpace=THREE.SRGBColorSpace;
 
 const material=new THREE.MeshBasicMaterial({
 map:textura,
@@ -219,18 +277,18 @@ Math.cos(angulo)*(radio-.38)
 );
 
 cuadro.rotation.y=angulo+Math.PI;
+
 scene.add(cuadro);
 
-console.log("IMAGEN CARGADA:",ruta);
+console.log(
+"CUADRO MOSTRADO:",
+nombre
+);
 
-},
-undefined,
-function(){
-console.error("ERROR AL CARGAR:",ruta);
 }
 );
 
-// Luz del cuadro
+// LUZ
 
 const foco=new THREE.PointLight(
 0xffdca0,
@@ -248,7 +306,9 @@ scene.add(foco);
 
 }
 
+// ========================================
 // 20 IMÁGENES
+// ========================================
 
 const imagenes=[
 "cuadro1.jpg",
@@ -285,7 +345,9 @@ angulo
 
 }
 
+// ========================================
 // PILARES
+// ========================================
 
 function crearColumna(angulo){
 
@@ -330,7 +392,9 @@ crearColumna(Math.PI);
 crearColumna(Math.PI*1.5);
 crearColumna(Math.PI/4);
 
+// ========================================
 // BUSTOS
+// ========================================
 
 function crearBustoPilar(
 archivo,
@@ -339,16 +403,12 @@ ancho,
 alto
 ){
 
-const loader=new THREE.TextureLoader();
+// CORREGIDO:
+// LAS IMÁGENES ESTÁN EN LA RAÍZ
 
-loader.load(
-"./imagenes/"+archivo,
+cargarImagen(
+archivo,
 function(textura){
-
-textura.colorSpace=
-THREE.SRGBColorSpace;
-
-// Material transparente
 
 const materialBusto=
 new THREE.MeshStandardMaterial({
@@ -391,15 +451,13 @@ busto.castShadow=true;
 
 scene.add(busto);
 
-// Capa de profundidad
+// PROFUNDIDAD
 
 const profundidad=new THREE.Mesh(
-
 new THREE.PlaneGeometry(
 ancho-.08,
 alto-.08
 ),
-
 new THREE.MeshBasicMaterial({
 map:textura,
 transparent:true,
@@ -407,7 +465,6 @@ alphaTest:0.05,
 opacity:.18,
 side:THREE.DoubleSide
 })
-
 );
 
 const distanciaProfundidad=8.48;
@@ -429,7 +486,7 @@ angulo+Math.PI;
 
 scene.add(profundidad);
 
-// Luz del busto
+// LUZ DEL BUSTO
 
 const luzBusto=new THREE.PointLight(
 0xffd6a0,
@@ -454,25 +511,18 @@ zl
 scene.add(luzBusto);
 
 console.log(
-"BUSTO CARGADO:",
+"BUSTO MOSTRADO:",
 archivo
 );
 
-},
-undefined,
-function(){
-
-console.error(
-"NO SE PUDO CARGAR:",
-"./imagenes/"+archivo
-);
-
 }
 );
 
 }
 
-// BUSTO 1
+// ========================================
+// 5 BUSTOS
+// ========================================
 
 crearBustoPilar(
 "busto.png",
@@ -481,16 +531,12 @@ crearBustoPilar(
 3.0
 );
 
-// BUSTO 2
-
 crearBustoPilar(
 "ORU.PNG",
 Math.PI,
 2.2,
 3.0
 );
-
-// BUSTO 3
 
 crearBustoPilar(
 "toba.png",
@@ -499,16 +545,12 @@ Math.PI/2,
 3.0
 );
 
-// BUSTO 4
-
 crearBustoPilar(
 "ne.png",
 Math.PI*1.5,
 2.2,
 3.0
 );
-
-// BUSTO 5
 
 crearBustoPilar(
 "bigo.png",
@@ -517,7 +559,9 @@ Math.PI/4,
 3.1
 );
 
+// ========================================
 // LUCES DEL TECHO
+// ========================================
 
 function crearLuzTecho(angulo){
 
@@ -538,7 +582,7 @@ z
 
 scene.add(luz);
 
-// Lámpara
+// LÁMPARA
 
 const lampara=new THREE.Mesh(
 new THREE.SphereGeometry(
@@ -561,7 +605,7 @@ scene.add(lampara);
 
 }
 
-// 5 luces
+// 5 LUCES
 
 crearLuzTecho(0);
 crearLuzTecho(Math.PI/2);
@@ -569,7 +613,9 @@ crearLuzTecho(Math.PI);
 crearLuzTecho(Math.PI*1.5);
 crearLuzTecho(Math.PI/4);
 
+// ========================================
 // MOVIMIENTO
+// ========================================
 
 let adelante=false;
 let atras=false;
@@ -614,11 +660,15 @@ derecha=false;
 }
 );
 
+// ========================================
 // VELOCIDAD
+// ========================================
 
 const velocidad=0.065;
 
+// ========================================
 // ANIMACIÓN
+// ========================================
 
 function animar(){
 
@@ -642,11 +692,11 @@ if(derecha){
 controls.moveRight(velocidad);
 }
 
-// Altura
+// ALTURA
 
 camera.position.y=1.7;
 
-// Límite
+// LÍMITE
 
 const distancia=Math.sqrt(
 camera.position.x*camera.position.x+
@@ -672,11 +722,15 @@ camera
 
 }
 
+// ========================================
 // INICIAR
+// ========================================
 
 animar();
 
+// ========================================
 // CAMBIO DE TAMAÑO
+// ========================================
 
 window.addEventListener(
 "resize",
