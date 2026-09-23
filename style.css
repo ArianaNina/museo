@@ -16,167 +16,132 @@ canvas{
 display:block;
 }
 
-/* Título superior */
 #titulo{
 position:fixed;
 top:22px;
 left:50%;
 transform:translateX(-50%);
 z-index:5;
-
 color:white;
-
 font-size:24px;
 font-weight:bold;
-
 letter-spacing:3px;
-
 text-align:center;
-
-text-shadow:
-0 3px 8px #000;
-
+text-shadow:0 3px 8px #000;
 pointer-events:none;
 }
 
-/* Controles */
+.btn-inicio{
+position:fixed;
+top:20px;
+right:25px;
+z-index:30;
+padding:10px 20px;
+background:rgba(0,0,0,.78);
+color:white;
+text-decoration:none;
+font-size:14px;
+font-weight:bold;
+letter-spacing:1px;
+border:1px solid rgba(255,255,255,.6);
+border-radius:8px;
+box-shadow:0 4px 12px rgba(0,0,0,.4);
+transition:.3s;
+}
+
+.btn-inicio:hover{
+background:#8b5e3c;
+transform:scale(1.05);
+}
+
 #controles{
 position:fixed;
-
 bottom:25px;
 left:50%;
-
 transform:translateX(-50%);
-
 z-index:5;
-
 background:rgba(0,0,0,.72);
-
 color:white;
-
 padding:12px 25px;
-
 border-radius:10px;
-
 font-size:14px;
-
 text-align:center;
-
 pointer-events:none;
-
-box-shadow:
-0 4px 12px rgba(0,0,0,.4);
+box-shadow:0 4px 12px rgba(0,0,0,.4);
 }
 
-/* Pantalla de bienvenida */
 #inicio{
 position:fixed;
-
 top:0;
 left:0;
-
 width:100%;
 height:100%;
-
 z-index:20;
-
 display:flex;
-
 flex-direction:column;
-
 justify-content:center;
-
 align-items:center;
-
-background:
-linear-gradient(
+background:linear-gradient(
 rgba(10,12,12,.70),
 rgba(10,10,10,.82)
 );
-
 color:white;
-
 text-align:center;
-
 cursor:pointer;
 }
 
-/* Bienvenidos */
 .bienvenida{
 font-size:52px;
-
 font-weight:bold;
-
 letter-spacing:8px;
-
-text-shadow:
-0 4px 15px #000;
-
+text-shadow:0 4px 15px #000;
 margin-bottom:18px;
 }
 
-/* Nombre */
 .nombreMuseo{
 font-size:30px;
-
 font-weight:normal;
-
 letter-spacing:5px;
-
-text-shadow:
-0 3px 10px #000;
-
+text-shadow:0 3px 10px #000;
 margin-bottom:30px;
 }
 
-/* Mensaje */
 .mensaje{
 font-size:15px;
-
 letter-spacing:2px;
-
 color:#e8d8c1;
-
 background:rgba(0,0,0,.45);
-
 padding:12px 24px;
-
 border-radius:8px;
-
-box-shadow:
-0 3px 10px rgba(0,0,0,.4);
+box-shadow:0 3px 10px rgba(0,0,0,.4);
 }
 
-/* Punto central */
 body::after{
 content:"";
-
 position:fixed;
-
 left:50%;
 top:50%;
-
 width:5px;
 height:5px;
-
 background:white;
-
 border-radius:50%;
-
 transform:translate(-50%,-50%);
-
 z-index:10;
-
-box-shadow:
-0 0 5px #000;
+box-shadow:0 0 5px #000;
 }
 
-/* Adaptación para pantallas pequeñas */
 @media(max-width:700px){
 
 #titulo{
 font-size:16px;
 letter-spacing:2px;
+}
+
+.btn-inicio{
+top:15px;
+right:15px;
+padding:8px 14px;
+font-size:12px;
 }
 
 .bienvenida{
