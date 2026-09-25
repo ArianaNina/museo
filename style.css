@@ -164,3 +164,87 @@ padding:10px 15px;
 }
 
 }
+/* ==============================
+   HISTORIA DE LOS BUSTOS
+   ============================== */
+
+#historiaBusto{
+
+    position:fixed;
+
+    left:50%;
+    bottom:70px;
+
+    transform:translateX(-50%);
+
+    width:380px;
+
+    padding:18px 22px;
+
+    background:rgba(0,0,0,0.82);
+
+    border:1px solid rgba(255,255,255,0.45);
+
+    border-radius:14px;
+
+    color:white;
+
+    z-index:50;
+
+    text-align:center;
+
+    box-shadow:
+        0 5px 25px rgba(0,0,0,0.6);
+
+    display:none;
+
+    backdrop-filter:blur(8px);
+}
+
+#historiaBusto h2{
+
+    margin:0 0 10px 0;
+
+    color:#f0c98b;
+
+    font-size:20px;
+
+    letter-spacing:1px;
+}
+
+#historiaBusto p{
+
+    margin:0;
+
+    font-size:14px;
+
+    line-height:1.5;
+
+    color:#eeeeee;
+}
+
+@media(max-width:700px){
+
+    #historiaBusto{
+
+        width:85%;
+
+        bottom:60px;
+
+        padding:15px;
+
+    }
+
+    #historiaBusto h2{
+
+        font-size:17px;
+
+    }
+
+    #historiaBusto p{
+
+        font-size:12px;
+
+    }
+
+}
