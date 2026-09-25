@@ -393,6 +393,87 @@ crearColumna(Math.PI*1.5);
 crearColumna(Math.PI/4);
 
 // ========================================
+// HISTORIAS DE LOS BUSTOS
+// ========================================
+
+const bustosInteractivos=[];
+
+const historiasBustos={
+
+    // ====================================
+    // BUSTO 1
+    // ====================================
+"busto.png":{
+    titulo:"Personaje del Tinku",
+    texto:
+    "Esta representación está relacionada con el Tinku, una expresión cultural andina caracterizada por su música, vestimenta, danza y simbolismo. " +
+    "En el contexto del Carnaval de Oruro, el Tinku forma parte de las expresiones folklóricas que muestran la diversidad cultural de Bolivia.",
+    fuente:
+    "Gobierno Autónomo Departamental de Oruro y fuentes culturales sobre el Carnaval de Oruro."
+},
+
+    // ====================================
+    // BUSTO 2
+    // ====================================
+"ORU.PNG":{
+    titulo:"El Doctorcito – Wayra Leva",
+    texto:
+    "Personaje de la danza de los Doctorcitos del Carnaval de Oruro. " +
+    "Su máscara se caracteriza por los anteojos, la nariz prominente y el gran bigote. " +
+    "Representa de forma satírica a los abogados y leguleyos.",
+    fuente:
+    "Fuente: UNESCO – Carnaval de Oruro."
+},
+
+
+    // ====================================
+    // BUSTO 3
+    // ====================================
+"toba.png":{
+    titulo:"Personaje de la Danza de los Tobas",
+    texto:
+    "La máscara representa un personaje de la danza de los Tobas del Carnaval de Oruro. " +
+    "Su pintura facial y sus rasgos guerreros forman parte de la identidad visual de esta danza. " +
+    "Entre sus personajes se encuentran el Toba, Chuncho, Cambas, Macheteros y Brujo.",
+    fuente:
+    "Fuente: Comité Departamental de Etnografía y Folklore de Oruro."
+},
+
+    // ====================================
+    // BUSTO 4
+    // ====================================
+
+ "ne.png":{
+    titulo:"La Negra María Antonieta",
+    texto:
+    "Personaje de la Morenada del Carnaval de Oruro. " +
+    "Forma parte del relato tradicional de la danza y se caracteriza por sus movimientos y vestimenta.",
+    fuente:
+    "Fuente: Fraternidad Morenada Central Oruro y La Patria Bolivia."
+},
+
+
+    // ====================================
+    // BUSTO 5
+    // ====================================
+
+    "bigo.png":{
+
+        titulo:"Personaje de la tradición orureña",
+
+        texto:
+        "Esta representación destaca por sus rasgos marcados, adornos y elementos de vestuario. " +
+        "Las máscaras y personajes del Carnaval permiten transmitir historias, creencias y tradiciones mediante la danza. " +
+        "Esta riqueza artística forma parte de una celebración en la que participan miles de bailarines y músicos.",
+
+        fuente:
+        "UNESCO – Carnaval de Oruro."
+
+    }
+
+};
+
+// ========================================
 // BUSTOS
 // ========================================
 
@@ -450,7 +531,17 @@ angulo+Math.PI;
 busto.castShadow=true;
 
 scene.add(busto);
+bustosInteractivos.push({
 
+    objeto:busto,
+
+    archivo:archivo,
+
+    titulo:historiasBustos[archivo].titulo,
+
+    texto:historiasBustos[archivo].texto
+
+});
 // PROFUNDIDAD
 
 const profundidad=new THREE.Mesh(
@@ -667,13 +758,79 @@ derecha=false;
 const velocidad=0.065;
 
 // ========================================
+// DETECTAR CERCANÍA A LOS BUSTOS
+// ========================================
+
+const historiaBusto=
+document.getElementById("historiaBusto");
+
+const tituloHistoria=
+document.getElementById("tituloHistoria");
+
+const textoHistoria=
+document.getElementById("textoHistoria");
+
+function revisarCercaniaBustos(){
+
+    let bustoCercano=null;
+
+    let distanciaMenor=3.0;
+
+    for(
+        let i=0;
+        i<bustosInteractivos.length;
+        i++
+    ){
+
+        const busto=
+        bustosInteractivos[i].objeto;
+
+        const distancia=
+        camera.position.distanceTo(
+            busto.position
+        );
+
+        if(
+            distancia<distanciaMenor
+        ){
+
+            distanciaMenor=distancia;
+
+            bustoCercano=
+            bustosInteractivos[i];
+
+        }
+
+    }
+
+    if(bustoCercano){
+
+        tituloHistoria.textContent=
+        bustoCercano.titulo;
+
+        textoHistoria.textContent=
+        bustoCercano.texto;
+
+        historiaBusto.style.display=
+        "block";
+
+    }else{
+
+        historiaBusto.style.display=
+        "none";
+
+    }
+
+}
+
+// ========================================
 // ANIMACIÓN
 // ========================================
 
 function animar(){
 
 requestAnimationFrame(animar);
-
+revisarCercaniaBustos();
 if(controls.isLocked){
 
 if(adelante){
