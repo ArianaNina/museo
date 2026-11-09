@@ -1,51 +1,54 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Museo de la Virgen del Socavón</title>
-<link rel="stylesheet" href="./style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Museo de la Virgen del Socavón</title>
+    <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 
-<div id="titulo">
-MUSEO DE LA VIRGEN DEL SOCAVÓN
-</div>
+    <div id="titulo">
+        MUSEO DE LA VIRGEN DEL SOCAVÓN
+    </div>
 
-<a href="https://ariananina.github.io/socavon/virgen/" class="btn-inicio">
-INICIO
-</a>
+    <a href="https://ariananina.github.io/socavon/virgen/"
+       class="btn-inicio">
+        INICIO
+    </a>
 
-<div id="controles">
-<b>W A S D</b> caminar | <b>Mouse</b> mirar
-</div>
+    <div id="controles">
+        <b>W A S D</b> caminar |
+        <b>Mouse</b> mirar |
+        <b>ESC</b> salir
+    </div>
 
-<div id="inicio">
+    <div id="inicio">
+        <div class="bienvenida">
+            BIENVENIDOS AL MUSEO
+        </div>
 
-<div class="bienvenida">
-BIENVENIDOS AL MUSEO
-</div>
+        <div class="nombreMuseo">
+            MUSEO DE LA VIRGEN DEL SOCAVÓN
+        </div>
 
-<div class="nombreMuseo">
-MUSEO DE LA VIRGEN DEL SOCAVÓN
-</div>
+        <div class="mensaje">
+            Haz clic para comenzar el recorrido
+        </div>
+    </div>
 
-<div class="mensaje">
-Haz clic para comenzar el recorrido
-</div>
 
-</div>
+    <div id="historiaBusto">
+        <h2 id="tituloHistoria"></h2>
+        <p id="textoHistoria"></p>
+    </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-<!-- HISTORIA DEL BUSTO -->
-<div id="historiaBusto">
-    <h2 id="tituloHistoria"></h2>
-    <p id="textoHistoria"></p>
-</div>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
 
-<script src="./script.js"></script>
+    <script src="./script.js"></script>
 
 </body>
 </html>
