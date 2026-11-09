@@ -8,7 +8,7 @@ scene.background=new THREE.Color(0x181411);
 // CÁMARA
 
 const camera=new THREE.PerspectiveCamera(
-75,
+60,
 window.innerWidth/window.innerHeight,
 0.1,
 1000
@@ -41,8 +41,132 @@ const controls=new THREE.PointerLockControls(
 camera,
 document.body
 );
+// ZOOM CON LA RUEDA DEL MOUSE
+window.addEventListener("wheel", function(e) {
+    camera.fov += e.deltaY > 0 ? 2 : -2;
 
+    camera.fov = THREE.MathUtils.clamp(camera.fov, 30, 90);
+
+    camera.updateProjectionMatrix();
+});
 const inicio=document.getElementById("inicio");
+
+const botonNoche=document.createElement("button");
+
+botonNoche.id="botonNoche";
+botonNoche.textContent="NOCHE";
+botonNoche.className="boton-noche";
+
+document.body.appendChild(botonNoche);
+
+let modoNoche=false;
+const lamparasMuseo=[];
+function cambiarModoNoche(){
+
+    modoNoche=!modoNoche;
+// ENCENDER Y APAGAR LAS LUCES
+scene.traverse(function(objeto){
+
+    // Los cinco plafones permanecen visibles de dia y de noche
+    if(objeto.userData.focoCentral){
+        objeto.visible=true;
+    }
+
+    if(objeto.isLight){
+
+        // FOCO CENTRAL GRANDE: ENCENDIDO DE DIA Y APAGADO DE NOCHE
+        if(objeto.userData.luzCentro){
+            objeto.visible=!modoNoche;
+            objeto.intensity=modoNoche ? 2.9 : 2.8;
+        }
+
+        // LUCES DE LOS PILARES
+        else if(objeto.userData.luzPilar){
+            objeto.visible=modoNoche;
+        }
+
+        // LUCES DEL TECHO
+        else if(objeto.userData.luzTecho){
+            objeto.visible=!modoNoche;
+        }
+
+        // DEMÁS LUCES
+        else{
+            objeto.visible=!modoNoche;
+        }
+
+        // LUZ DE LOS CUADROS
+        if(objeto.userData.luzCuadro){
+            objeto.intensity=modoNoche ? 5 : 0.8;
+        }
+    }
+
+});
+
+    // CAMBIAR COLOR DE LAS LAMPARAS
+    lamparasMuseo.forEach(function(lampara){
+
+        lampara.material.color.set(
+            modoNoche ? 0x292929 : 0xffe5ad
+        );
+
+    });
+
+    // FONDO DEL MUSEO
+    scene.background.set(
+         modoNoche ? 0x367b91 : 0x000000
+    );
+    // PARED: AZUL GRISÁCEO VISIBLE EN MODO NOCHE
+    materialPared.color.set(
+        modoNoche ? 0x526f7d : 0x17645f
+    );
+    materialPared.emissive.set(
+        modoNoche ? 0x263943 : 0x000000
+    );
+    materialPared.emissiveIntensity = modoNoche ? 0.55 : 0;
+
+    // TECHO: PLOMO SEMI OSCURO, NO NEGRO
+    materialTecho.color.set(
+        modoNoche ? 0x555555 : 0xd8d1c5
+    );
+    materialTecho.emissive.set(
+        modoNoche ? 0x242424 : 0x000000
+    );
+    materialTecho.emissiveIntensity = modoNoche ? 0.45 : 0;
+
+    // POSTES: PLOMO MEDIO DE NOCHE Y COLOR ORIGINAL DE DÍA
+    scene.traverse(function(objeto){
+        if(objeto.userData.posteMuseo && objeto.material){
+            objeto.material.color.set(
+                modoNoche ? 0x666666 : 0x555555
+            );
+            objeto.material.emissive.set(
+                modoNoche ? 0x222222 : 0x000000
+            );
+            objeto.material.emissiveIntensity = modoNoche ? 0.35 : 0;
+        }
+    });
+
+    // DISMINUIR EL BRILLO DEL PISO EN MODO NOCHE
+    materialPiso.color.set(
+    modoNoche ? 0x777777 : 0xffffff
+);
+    // CAMBIAR TEXTO DEL BOTON
+    botonNoche.textContent=
+        modoNoche ? "DÍA" : "NOCHE";
+
+    botonNoche.classList.toggle("modo-dia",modoNoche);
+}
+
+// FUNCION DEL BOTON
+botonNoche.addEventListener("click",function(e){
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    cambiarModoNoche();
+
+});
 
 inicio.addEventListener("click",function(){
 controls.lock();
@@ -80,17 +204,13 @@ function(textura){
 // THREE.JS R128
 textura.encoding=THREE.sRGBEncoding;
 textura.needsUpdate=true;
-
 console.log("IMAGEN CARGADA:",ruta);
-
 funcion(textura);
 
 },
 
 undefined,
-
 function(error){
-
 console.error("ERROR AL CARGAR:",ruta);
 console.error(error);
 
@@ -100,31 +220,89 @@ console.error(error);
 }
 
 // ========================================
-// LUCES
+// ========================================
+// 5 FOCOS REDONDOS EN EL TECHO
+// PLAFONES SIEMPRE VISIBLES / LUZ SOLO DE DIA
 // ========================================
 
-const ambiente=new THREE.AmbientLight(
-0xffffff,
-0.9
-);
+const focosTecho=[];
+const lucesFocos=[];
 
-scene.add(ambiente);
+// Posiciones: uno en el centro y cuatro alrededor
+const posicionesFocos=[
+    [0,0],
+    [-4.2,-3.2],
+    [4.2,-3.2],
+    [-4.2,3.2],
+    [4.2,3.2]
+];
 
-const luzPrincipal=new THREE.DirectionalLight(
-0xfff1d6,
-1.1
-);
+posicionesFocos.forEach(function(posicion){
 
-luzPrincipal.position.set(
-0,
-8,
-5
-);
+    const foco=new THREE.Group();
+    foco.position.set(posicion[0],6.85,posicion[1]);
 
-luzPrincipal.castShadow=true;
+    // Aro exterior gris del plafon
+    const aro=new THREE.Mesh(
+        new THREE.TorusGeometry(0.78,0.075,16,64),
+        new THREE.MeshStandardMaterial({
+            color:0xaaaaaa,
+            roughness:0.5,
+            metalness:0.1
+        })
+    );
+    aro.rotation.x=Math.PI/2;
+    foco.add(aro);
 
-scene.add(luzPrincipal);
+    // Difusor blanco visible, permanece en noche
+    const difusor=new THREE.Mesh(
+        new THREE.CircleGeometry(0.72,64),
+        new THREE.MeshBasicMaterial({
+            color:0xffffff,
+            side:THREE.DoubleSide
+        })
+    );
+    difusor.rotation.x=-Math.PI/2;
+    difusor.position.y=-0.012;
+    foco.add(difusor);
 
+    // Halo suave alrededor del plafon
+    const halo=new THREE.Mesh(
+        new THREE.CircleGeometry(0.84,64),
+        new THREE.MeshBasicMaterial({
+            color:0xffffff,
+            transparent:true,
+            opacity:0.22,
+            side:THREE.DoubleSide,
+            depthWrite:false
+        })
+    );
+    halo.rotation.x=-Math.PI/2;
+    halo.position.y=-0.022;
+    foco.add(halo);
+
+    // El plafon queda visible tanto de dia como de noche
+    foco.userData.focoCentral=true;
+    foco.visible=true;
+    scene.add(foco);
+    focosTecho.push(foco);
+
+    // Luz blanca debajo de cada foco
+    const luz=new THREE.PointLight(
+        0xffffff,
+        2.8,      // intensidad aumentada
+        18,        // alcance
+        1
+    );
+    luz.position.set(posicion[0],6.45,posicion[1]);
+    luz.userData.luzCentro=true;
+    luz.visible=true;
+    luz.castShadow=false;
+    scene.add(luz);
+    lucesFocos.push(luz);
+});
+
+// ========================================
 // ========================================
 // PISO
 // ========================================
@@ -132,9 +310,17 @@ scene.add(luzPrincipal);
 const radio=12;
 const altura=7;
 
-const materialPiso=new THREE.MeshStandardMaterial({
-color:0x66574a,
-roughness:.75
+const texturaMarmol = textureLoader.load("./marmol.jpg");
+
+texturaMarmol.wrapS = THREE.RepeatWrapping;
+texturaMarmol.wrapT = THREE.RepeatWrapping;
+texturaMarmol.repeat.set(5, 5);
+texturaMarmol.encoding = THREE.sRGBEncoding;
+
+const materialPiso = new THREE.MeshBasicMaterial({
+    map: texturaMarmol,
+    color: 0xffffff,
+    side: THREE.DoubleSide
 });
 
 const piso=new THREE.Mesh(
@@ -143,7 +329,7 @@ materialPiso
 );
 
 piso.rotation.x=-Math.PI/2;
-piso.receiveShadow=true;
+piso.receiveShadow=false;
 
 scene.add(piso);
 
@@ -170,16 +356,16 @@ materialPared
 );
 
 pared.position.y=altura/2;
-
 scene.add(pared);
 
 // ========================================
 // TECHO
 // ========================================
-
-const materialTecho=new THREE.MeshStandardMaterial({
-color:0xd8d1c5,
-side:THREE.DoubleSide
+const materialTecho = new THREE.MeshStandardMaterial({
+    color:0x444444,
+    roughness: 0.9,
+    metalness: 0,
+    side: THREE.DoubleSide
 });
 
 const techo=new THREE.Mesh(
@@ -219,8 +405,8 @@ scene.add(borde);
 
 function crearCuadro(nombre,angulo){
 
-const ancho=3.0;
-const alto=4.8;
+const ancho=3.3;
+const alto=5.9;
 
 // MARCO
 
@@ -231,8 +417,9 @@ alto+.35,
 .22
 ),
 new THREE.MeshStandardMaterial({
-color:0x59351f,
-roughness:.45
+    color:0x4b2e1f,
+    roughness:0.85,
+    metalness:0
 })
 );
 
@@ -288,21 +475,6 @@ nombre
 }
 );
 
-// LUZ
-
-const foco=new THREE.PointLight(
-0xffdca0,
-0.8,
-6
-);
-
-foco.position.set(
-Math.sin(angulo)*(radio-1),
-5,
-Math.cos(angulo)*(radio-1)
-);
-
-scene.add(foco);
 
 }
 
@@ -345,42 +517,37 @@ angulo
 
 }
 
-// ========================================
-// PILARES
-// ========================================
 
 function crearColumna(angulo){
 
-const distanciaColumna=9;
+    const distanciaColumna=9;
 
-const x=
-Math.sin(angulo)*distanciaColumna;
+    const x=Math.sin(angulo)*distanciaColumna;
+    const z=Math.cos(angulo)*distanciaColumna;
 
-const z=
-Math.cos(angulo)*distanciaColumna;
-
-const material=new THREE.MeshStandardMaterial({
-color:0xc7b69b,
-roughness:.6
+ const material=new THREE.MeshStandardMaterial({
+    color:0x555555,
+    roughness:0.8,
+    metalness:0.1
 });
 
-const columna=new THREE.Mesh(
-new THREE.CylinderGeometry(
-.22,
-.32,
-6.2,
-24
-),
-material
-);
+    const columna=new THREE.Mesh(
+        new THREE.CylinderGeometry(
+            .22,
+            .32,
+            6.2,
+            24
+        ),
+        material
+    );
 
-columna.position.set(
-x,
-3.1,
-z
-);
+    columna.position.set(x,3.1,z);
 
-scene.add(columna);
+    // IDENTIFICAR EL POSTE PARA CAMBIAR SU COLOR DÍA/NOCHE
+    columna.userData.posteMuseo=true;
+
+    scene.add(columna);
+
 
 }
 
@@ -477,140 +644,114 @@ const historiasBustos={
 // BUSTOS
 // ========================================
 
-function crearBustoPilar(
-archivo,
-angulo,
-ancho,
-alto
-){
+// ========================================
+// CONTORNO BLANCO BRILLANTE PARA BUSTOS
+// ========================================
+function crearTexturaContorno(imagen){
 
-// CORREGIDO:
-// LAS IMÁGENES ESTÁN EN LA RAÍZ
+    const canvas=document.createElement("canvas");
+    canvas.width=imagen.width;
+    canvas.height=imagen.height;
 
-cargarImagen(
-archivo,
-function(textura){
+    const ctx=canvas.getContext("2d");
 
-const materialBusto=
-new THREE.MeshStandardMaterial({
-map:textura,
-transparent:true,
-alphaTest:0.05,
-side:THREE.DoubleSide,
-roughness:.45,
-metalness:0.02
-});
+ // Limpiar el canvas
+ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-// Busto
+// Brillo blanco alrededor de la imagen
+ctx.shadowColor = "#ffffff";
+ctx.shadowBlur = 90;
 
-const busto=new THREE.Mesh(
-new THREE.PlaneGeometry(
-ancho,
-alto
-),
-materialBusto
-);
+// IMPORTANTE: no desplazar la luz
+ctx.shadowOffsetX = 0;
+ctx.shadowOffsetY = 0;
 
-const distancia=8.55;
+// Dibujar la imagen
+ctx.drawImage(imagen, 0, 0);
 
-const x=
-Math.sin(angulo)*distancia;
+// Crear textura
+const textura = new THREE.CanvasTexture(canvas);
+textura.encoding = THREE.sRGBEncoding;
+textura.needsUpdate = true;
 
-const z=
-Math.cos(angulo)*distancia;
-
-busto.position.set(
-x,
-3.7,
-z
-);
-
-busto.rotation.y=
-angulo+Math.PI;
-
-busto.castShadow=true;
-
-scene.add(busto);
-bustosInteractivos.push({
-
-    objeto:busto,
-
-    archivo:archivo,
-
-    titulo:historiasBustos[archivo].titulo,
-
-    texto:historiasBustos[archivo].texto
-
-});
-// PROFUNDIDAD
-
-const profundidad=new THREE.Mesh(
-new THREE.PlaneGeometry(
-ancho-.08,
-alto-.08
-),
-new THREE.MeshBasicMaterial({
-map:textura,
-transparent:true,
-alphaTest:0.05,
-opacity:.18,
-side:THREE.DoubleSide
-})
-);
-
-const distanciaProfundidad=8.48;
-
-const xp=
-Math.sin(angulo)*distanciaProfundidad;
-
-const zp=
-Math.cos(angulo)*distanciaProfundidad;
-
-profundidad.position.set(
-xp,
-3.7,
-zp
-);
-
-profundidad.rotation.y=
-angulo+Math.PI;
-
-scene.add(profundidad);
-
-// LUZ DEL BUSTO
-
-const luzBusto=new THREE.PointLight(
-0xffd6a0,
-1.5,
-5
-);
-
-const distanciaLuz=7.8;
-
-const xl=
-Math.sin(angulo)*distanciaLuz;
-
-const zl=
-Math.cos(angulo)*distanciaLuz;
-
-luzBusto.position.set(
-xl,
-4.8,
-zl
-);
-
-scene.add(luzBusto);
-
-console.log(
-"BUSTO MOSTRADO:",
-archivo
-);
-
-}
-);
-
+return textura;
 }
 
+// ========================================
+// BUSTOS
+// ========================================
+function crearBustoPilar(archivo,angulo,ancho,alto){
+
+    cargarImagen(archivo,function(textura){
+
+        // MATERIAL ORIGINAL: IMAGEN CLARA Y SIN TRANSPARENCIA EXTRA
+        const materialBusto=new THREE.MeshBasicMaterial({
+            map:textura,
+            transparent:true,
+            alphaTest:0.02,
+            opacity:1,
+            side:THREE.DoubleSide,
+            depthWrite:false
+        });
+
+        const geometriaBusto=new THREE.PlaneGeometry(ancho,alto);
+
+        // CONTORNO BLANCO BRILLANTE
+        const texturaContorno=crearTexturaContorno(textura.image);
+
+        const materialContorno=new THREE.MeshBasicMaterial({
+            map:texturaContorno,
+            transparent:true,
+            alphaTest:0.01,
+            opacity:1,
+            side:THREE.DoubleSide,
+            depthWrite:false,
+            blending:THREE.AdditiveBlending
+        });
+
+        // BUSTO ORIGINAL
+        const busto=new THREE.Mesh(geometriaBusto,materialBusto);
+
+        const distancia=8.35;
+        const x=Math.sin(angulo)*distancia;
+        const z=Math.cos(angulo)*distancia;
+
+        busto.position.set(x,3.7,z);
+        busto.rotation.y=angulo+Math.PI;
+        busto.renderOrder=2;
+        busto.castShadow=false;
+
+        // CONTORNO: UN POCO MÁS GRANDE Y DETRÁS
+        const contorno=new THREE.Mesh(
+            new THREE.PlaneGeometry(ancho+0.25,alto+0.25),
+            materialContorno
+        );
+
+        const distanciaContorno=8.37;
+        contorno.position.set(
+            Math.sin(angulo)*distanciaContorno,
+            3.7,
+            Math.cos(angulo)*distanciaContorno
+        );
+
+        contorno.rotation.y=angulo+Math.PI;
+        contorno.renderOrder=1;
+
+        // AGREGAR CONTORNO Y BUSTO
+        scene.add(contorno);
+        scene.add(busto);
+
+        // INTERACCIÓN DEL BUSTO
+        bustosInteractivos.push({
+            objeto:busto,
+            archivo:archivo,
+            titulo:historiasBustos[archivo].titulo,
+            texto:historiasBustos[archivo].texto
+        });
+
+        console.log("BUSTO MOSTRADO:",archivo);
+    });
+}
 // ========================================
 // 5 BUSTOS
 // ========================================
@@ -650,59 +791,7 @@ Math.PI/4,
 3.1
 );
 
-// ========================================
-// LUCES DEL TECHO
-// ========================================
-
-function crearLuzTecho(angulo){
-
-const x=Math.sin(angulo)*7;
-const z=Math.cos(angulo)*7;
-
-const luz=new THREE.PointLight(
-0xffe8c2,
-1.3,
-9
-);
-
-luz.position.set(
-x,
-6.5,
-z
-);
-
-scene.add(luz);
-
-// LÁMPARA
-
-const lampara=new THREE.Mesh(
-new THREE.SphereGeometry(
-.15,
-16,
-16
-),
-new THREE.MeshBasicMaterial({
-color:0xffe5ad
-})
-);
-
-lampara.position.set(
-x,
-6.7,
-z
-);
-
-scene.add(lampara);
-
-}
-
-// 5 LUCES
-
-crearLuzTecho(0);
-crearLuzTecho(Math.PI/2);
-crearLuzTecho(Math.PI);
-crearLuzTecho(Math.PI*1.5);
-crearLuzTecho(Math.PI/4);
+// Se eliminan las lámparas decorativas del techo: queda solo la luz central.
 
 // ========================================
 // MOVIMIENTO
